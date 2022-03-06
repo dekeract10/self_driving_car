@@ -3,7 +3,7 @@ canvas.height = window.innerHeight;
 canvas.width = 500;
 
 const ctx = canvas.getContext("2d");
-const car = new Car(100, 100, 30, 50)
+const car = new Car(100, 300, 30, 50)
 
 animate();
 
