@@ -25,6 +25,8 @@ class Car {
 
     this.carImage = new Image(this.width, this.height)
     this.carImage.src = "car.png"
+    this.driftDirection = this.direction;
+    this.reachedMaxDriftAngle = false;
 
     this.controls = new Controls();
   }
@@ -66,11 +68,22 @@ class Car {
 
     if (this.controls.handbrake) {
       this.direction += steering;
-      let driftDirection = this.direction - Math.sign(steering) * Math.PI / 4;
-      deltaX = this.speed * Math.sin(driftDirection);
-      deltaY = this.speed * Math.cos(driftDirection);
+      if (!this.reachedMaxDriftAngle) {
+        if (Math.abs(this.driftDirection - this.direction) > Math.PI / 4) {
+          this.reachedMaxDriftAngle = true;
+        }
+        let tempDriftDirection = this.direction - (this.direction - this.driftDirection);
+        deltaX = this.speed * Math.sin(tempDriftDirection);
+        deltaY = this.speed * Math.cos(tempDriftDirection);
+      } else {
+        let tempDriftDirection = this.direction - Math.sign(steering) * Math.PI / 4;
+        deltaX = this.speed * Math.sin(tempDriftDirection);
+        deltaY = this.speed * Math.cos(tempDriftDirection);
+      }
     } else {
       this.direction += steering;
+      this.driftDirection = this.direction
+      this.reachedMaxDriftAngle = false;
       deltaX = this.speed * Math.sin(this.direction);
       deltaY = this.speed * Math.cos(this.direction);
     }
