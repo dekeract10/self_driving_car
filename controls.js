@@ -23,6 +23,9 @@ class Controls {
         case "ArrowDown":
           this.reverse = true;
           break;
+        case "Shift":
+          this.handbrake = true;
+          break;
       }
     }
 
@@ -39,6 +42,9 @@ class Controls {
           break;
         case "ArrowDown":
           this.reverse = false;
+          break;
+        case "Shift":
+          this.handbrake = false;
           break;
       }
     }

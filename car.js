@@ -1,5 +1,5 @@
 const ACCELERATION = 0.2
-const STEERING = Math.PI / 180
+const STEERING = Math.PI / 120
 const MAX_SPEED = 5
 const MIN_SPEED = -5
 const FRICTION = 0.05
@@ -36,12 +36,15 @@ class Car {
     if (this.controls.reverse) {
       this.speed -= this.acceleration
     }
+
+    let steering = 0
     if (this.controls.left) {
-      this.direction += STEERING * this.speed / MAX_SPEED
+      steering += STEERING * this.speed / MAX_SPEED
     }
     if (this.controls.right) {
-      this.direction -= STEERING * this.speed / MAX_SPEED
+      steering -= STEERING * this.speed / MAX_SPEED
     }
+
     if (!this.controls.reverse && !this.controls.forward) {
       this.speed *= (1 - FRICTION)
     }
@@ -58,8 +61,26 @@ class Car {
       this.speed = -MAX_SPEED / 2
     }
 
-    this.x += this.speed * Math.sin(this.direction);
-    this.y += this.speed * Math.cos(this.direction);
+    let deltaY = 0;
+    let deltaX = 0;
+
+    if (this.controls.handbrake) {
+      this.direction += steering;
+      let driftDirection = this.direction - Math.sign(steering) * Math.PI / 4;
+      deltaX = this.speed * Math.sin(driftDirection);
+      deltaY = this.speed * Math.cos(driftDirection);
+    } else {
+      this.direction += steering;
+      deltaX = this.speed * Math.sin(this.direction);
+      deltaY = this.speed * Math.cos(this.direction);
+    }
+
+
+    this.x += deltaX
+    this.y += deltaY
+
+    // this.direction += steering
+
 
   }
   draw(ctx) {
@@ -69,11 +90,22 @@ class Car {
 
     canvas.height = window.innerHeight
     ctx.save()
+
+
+    ctx.translate(
+      this.x,
+      this.y
+    )
+    ctx.rotate(-this.direction);
+    ctx.translate(
+      -this.x,
+      -this.y
+    )
+
     ctx.translate(
       center_x,
       center_y
     )
-    ctx.rotate(-this.direction);
     ctx.beginPath();
     ctx.fill();
     ctx.drawImage(this.carImage, 0, 0, this.width, this.height);
