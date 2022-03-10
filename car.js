@@ -25,8 +25,9 @@ class Car {
 
     this.carImage = new Image(this.width, this.height)
     this.carImage.src = "car.png"
-    this.driftDirection = this.direction;
-    this.reachedMaxDriftAngle = false;
+
+    this.startingDriftDirection = this.direction;
+    this.lastSteeringDirection = 0;
 
     this.controls = new Controls();
   }
@@ -40,6 +41,7 @@ class Car {
     }
 
     let steering = 0
+
     if (this.controls.left) {
       steering += STEERING * this.speed / MAX_SPEED
     }
@@ -68,22 +70,22 @@ class Car {
 
     if (this.controls.handbrake) {
       this.direction += steering;
-      if (!this.reachedMaxDriftAngle) {
-        if (Math.abs(this.driftDirection - this.direction) > Math.PI / 4) {
-          this.reachedMaxDriftAngle = true;
-        }
-        let tempDriftDirection = this.direction - (this.direction - this.driftDirection);
-        deltaX = this.speed * Math.sin(tempDriftDirection);
-        deltaY = this.speed * Math.cos(tempDriftDirection);
-      } else {
-        let tempDriftDirection = this.direction - Math.sign(steering) * Math.PI / 4;
-        deltaX = this.speed * Math.sin(tempDriftDirection);
-        deltaY = this.speed * Math.cos(tempDriftDirection);
+      if (this.lastSteeringDirection != Math.sign(steering)) {
+        this.startingDriftDirection = this.direction;
       }
+
+      let relativeDriftDirection = this.direction - this.startingDriftDirection;
+      let absoluteDriftDirection = 0;
+      if (relativeDriftDirection < 0) {
+        absoluteDriftDirection = this.direction - Math.max(relativeDriftDirection, -Math.PI / 4);
+      } else {
+        absoluteDriftDirection = this.direction - Math.min(relativeDriftDirection, Math.PI / 4);
+      }
+      deltaX = this.speed * Math.sin(absoluteDriftDirection);
+      deltaY = this.speed * Math.cos(absoluteDriftDirection);
     } else {
       this.direction += steering;
-      this.driftDirection = this.direction
-      this.reachedMaxDriftAngle = false;
+      this.startingDriftDirection = this.direction
       deltaX = this.speed * Math.sin(this.direction);
       deltaY = this.speed * Math.cos(this.direction);
     }
@@ -92,6 +94,7 @@ class Car {
     this.x += deltaX
     this.y += deltaY
 
+    this.lastSteeringDirection = Math.sign(steering);
     // this.direction += steering
 
 
